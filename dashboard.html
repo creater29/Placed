@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Market Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .filter-section { background: #f5f5f5; padding: 15px; margin-bottom: 20px; }
+        .job-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; }
+        .visualization { width: 48%; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Job Market Dashboard</h1>
+    <p>Last updated: {{ last_updated }}</p>
+    
+    <div class="filter-section">
+        <h2>Filters</h2>
+        <form method="get">
+            <label>Experience Level:
+                <select name="experience">
+                    <option value="">All</option>
+                    <option value="entry" {% if filters.experience == 'entry' %}selected{% endif %}>Entry Level</option>
+                    <option value="mid" {% if filters.experience == 'mid' %}selected{% endif %}>Mid Level</option>
+                    <option value="senior" {% if filters.experience == 'senior' %}selected{% endif %}>Senior</option>
+                </select>
+            </label>
+            
+            <label>Skills:
+                <select name="skills" multiple>
+                    {% for skill in all_skills %}
+                        <option value="{{ skill }}" {% if skill in filters.skills %}selected{% endif %}>{{ skill }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            
+            <button type="submit">Apply Filters</button>
+        </form>
+    </div>
+    
+    <div>
+        <div id="expChart" class="visualization"></div>
+        <div id="skillChart" class="visualization"></div>
+    </div>
+    
+    <h2>Job Listings ({{ jobs|length }} found)</h2>
+    {% for job in jobs %}
+        <div class="job-card">
+            <h3><a href="{{ job.url }}" target="_blank">{{ job.title }}</a></h3>
+            <p>{{ job.company }} - {{ job.location }}</p>
+            <p>Experience: {{ job.experience_level|capitalize }}</p>
+            <p>Skills: {{ job.skills|join(', ') }}</p>
+        </div>
+    {% endfor %}
+    
+    <script>
+        // Render visualizations
+        Plotly.react('expChart', JSON.parse('{{ visualizations.experience|safe }}'));
+        Plotly.react('skillChart', JSON.parse('{{ visualizations.skills|safe }}'));
+    </script>
+</body>
+</html>
